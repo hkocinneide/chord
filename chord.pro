@@ -9,5 +9,5 @@ INCLUDEPATH += .
 QT += network
 
 # Input
-HEADERS += main.hh
-SOURCES += main.cc
+HEADERS += main.hh chorddialog.hh netsocket.hh fileshare.hh
+SOURCES += main.cc chorddialog.cc netsocket.cc fileshare.cc
