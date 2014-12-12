@@ -20,6 +20,7 @@ public:
 public slots:
 	void gotReturnPressed();
   void gotReturnPressedConnection();
+  void gotReturnPressedSearch();
 
 private:
 	QTextEdit *textview;

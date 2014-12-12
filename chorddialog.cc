@@ -66,14 +66,14 @@ void ChordDialog::gotReturnPressed()
 
 void ChordDialog::gotReturnPressedConnection()
 {
-  QString con = newConnection->text();
+  QString con = newConnection->toPlainText();
   // Do something with the information
   newConnection->clear();
 }
 
 void ChordDialog::gotReturnPressedSearch()
 {
-  QString query = searchBox->text();
-
+  QString query = searchBox->toPlainText();
+  // Do s.t.
   searchBox->clear();
 }
