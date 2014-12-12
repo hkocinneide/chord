@@ -1,6 +1,7 @@
 #include <QGridLayout>
 #include <QVBoxLayout>
 #include <QGroupBox>
+#include <QDebug>
 
 #include "chorddialog.hh"
 
@@ -15,7 +16,7 @@ ChordDialog::ChordDialog()
   // Add yourself to the network
   QGroupBox *groupBoxConnect = new QGroupBox(tr("Join a Network"));
 
-  TextEntryBox *newConnection = new TextEntryBox();
+  newConnection = new TextEntryBox();
   newConnection->setMaximumHeight(35);
 
   QVBoxLayout *l = new QVBoxLayout();
@@ -51,6 +52,8 @@ ChordDialog::ChordDialog()
           this, SLOT(gotReturnPressed()));
   connect(newConnection, SIGNAL(returnPressed()),
           this, SLOT(gotReturnPressedConnection()));
+  connect(searchBox, SIGNAL(returnPressed()),
+          this, SLOT(gotReturnPressedSearch()));
 }
 
 ///////////
@@ -66,7 +69,7 @@ void ChordDialog::gotReturnPressed()
 
 void ChordDialog::gotReturnPressedConnection()
 {
-  QString con = newConnection->toPlainText();
+  newConnection->toPlainText();
   // Do something with the information
   newConnection->clear();
 }
