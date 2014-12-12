@@ -2,3 +2,6 @@ Makefile
 moc_*
 *.o
 chord
+*.vim
+*.swp
+*.swo

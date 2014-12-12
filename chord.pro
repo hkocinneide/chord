@@ -10,6 +10,6 @@ QT += network
 
 # Input
 HEADERS += main.hh chorddialog.hh netsocket.hh fileshare.hh communicator.hh  \
-           peer.hh
+           peer.hh textentrybox.hh
 SOURCES += main.cc chorddialog.cc netsocket.cc fileshare.cc communicator.cc  \
-           peer.cc
+           peer.cc textentrybox.cc

@@ -4,6 +4,9 @@
 #include <QDialog>
 #include <QTextEdit>
 #include <QLineEdit>
+#include <QListWidget>
+
+#include "textentrybox.hh"
 
 class ChordDialog : public QDialog
 {
@@ -12,12 +15,17 @@ class ChordDialog : public QDialog
 public:
 	ChordDialog();
 
+  QListWidget *searchList;
+
 public slots:
 	void gotReturnPressed();
+  void gotReturnPressedConnection();
 
 private:
 	QTextEdit *textview;
 	QLineEdit *textline;
+  TextEntryBox *newConnection;
+  TextEntryBox *searchBox;
 };
 
 #endif // CHORD_CHORDDIALOG_HH
