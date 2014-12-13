@@ -7,6 +7,8 @@
 #include <QListWidget>
 
 #include "textentrybox.hh"
+#include "communicator.hh"
+#include "chord.hh"
 
 class ChordDialog : public QDialog
 {
@@ -15,6 +17,8 @@ class ChordDialog : public QDialog
 public:
 	ChordDialog();
 
+  static ChordDialog *dialog;
+  Communicator *communicator;
   QListWidget *searchList;
 
 public slots:

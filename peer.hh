@@ -11,9 +11,18 @@ class Peer : public QObject
 public:
   Peer(QHostAddress IP, quint16 port);
 
+  static quint64 myName;
+
+  Peer *next;
+  Peer *prev;
   QHostAddress IPAddress;
   quint16 port;
-  QByteArray name;
+  quint64 name;
+
+  static Peer *fromString(QString connection);
+  static quint64 Sha1Mod64(QByteArray *data);
+
+  void setLocal();
 };
 
 #endif // CHORD_PEER_HH

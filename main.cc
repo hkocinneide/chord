@@ -13,19 +13,23 @@ int main(int argc, char **argv)
 {
 	QApplication app(argc,argv);
 
-	ChordDialog dialog;
-	dialog.show();
-
 	NetSocket sock;
 	if (!sock.bind())
 		exit(1);
 
-  Communicator comm(&sock);
+  Communicator comm;
+
+	ChordDialog dialog;
+	dialog.show();
 
   if (TESTMAIN)
   {
     Peer john(QHostAddress(1), 1);
     Peer joe(QHostAddress(0xffffffff), 0xffff);
+    QVariantMap msg;
+    msg.insert("Message", QVariant("It works!"));
+    QHostAddress address = QHostAddress::LocalHost;
+    comm.sendVariantMap(&msg, &address, 38148);
   }
 
 	return app.exec();

@@ -4,9 +4,14 @@
 #include <QDebug>
 
 #include "chorddialog.hh"
+#include "peer.hh"
+
+ChordDialog *ChordDialog::dialog = NULL;
 
 ChordDialog::ChordDialog()
 {
+  dialog = this;
+
 	setWindowTitle("Chord");
 
 	textview = new QTextEdit(this);
@@ -69,8 +74,27 @@ void ChordDialog::gotReturnPressed()
 
 void ChordDialog::gotReturnPressedConnection()
 {
-  newConnection->toPlainText();
-  // Do something with the information
+  if (Chord::chord == NULL)
+  {
+    QString connection = newConnection->toPlainText();
+    if (connection != "New")
+    {
+      Peer *p = Peer::fromString(connection);
+      if (!p)
+      {
+        newConnection->clear();
+        return;
+      }
+      QVariantMap msg;
+      msg.insert("Init", QVariant(1));
+      qDebug() << "Sending Init message to" << p->IPAddress << p->port;
+      Communicator::comm->sendVariantMap(&msg, p);
+    }
+    else
+    {
+      new Chord();
+    }
+  }
   newConnection->clear();
 }
 

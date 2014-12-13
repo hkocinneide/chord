@@ -12,8 +12,9 @@ class Communicator : public QObject
   Q_OBJECT
 
 public:
-  Communicator(NetSocket *sock);
+  Communicator();
 
+  static Communicator *comm;
   NetSocket *sock;
 
   void processDatagram(QByteArray *datagram, QHostAddress *sender, quint16 senderPort);
@@ -22,6 +23,7 @@ public:
 
 public slots:
   void gotReadyRead();
+
 };
 
 #endif // CHORD_COMMUNICATOR_HH
