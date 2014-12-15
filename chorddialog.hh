@@ -21,6 +21,8 @@ public:
   Communicator *communicator;
   QListWidget *searchList;
 
+  void initChord(QString connection);
+
 public slots:
 	void gotReturnPressed();
   void gotReturnPressedConnection();

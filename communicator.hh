@@ -20,6 +20,7 @@ public:
   void processDatagram(QByteArray *datagram, QHostAddress *sender, quint16 senderPort);
   void sendVariantMap(QVariantMap *msg, QHostAddress *IP, quint16 port); 
   void sendVariantMap(QVariantMap *msg, Peer *peer);
+  void sendBlock(quint64, QByteArray *block);
 
 public slots:
   void gotReadyRead();

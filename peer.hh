@@ -20,7 +20,6 @@ public:
   quint64 name;
 
   static Peer *fromString(QString connection);
-  static quint64 Sha1Mod64(QByteArray *data);
 
   void setLocal();
 };

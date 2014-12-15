@@ -1,8 +1,11 @@
 #include <QDataStream>
 #include <QIODevice>
 
+#include "main.hh"
 #include "communicator.hh"
 #include "chord.hh"
+#include "fileshare.hh"
+
 
 Communicator *Communicator::comm = NULL;
 
@@ -56,6 +59,10 @@ void Communicator::processDatagram(QByteArray *datagram,
   {
     Chord::chord->notified(&map);
   }
+  else if (map.contains("BlockStore"))
+  {
+    FileShare::share->receiveBlock(&map);
+  }
   else
   {
     qDebug() << "Got an unknown message";
@@ -66,14 +73,14 @@ void Communicator::sendVariantMap(QVariantMap *msg,
                                   QHostAddress *IP,
                                   quint16 port)
 {
-  qDebug() << "Sending Datagram, map size:" << msg->count();
-  qDebug() << "Sending to" << *IP << port;
+  // qDebug() << "Sending Datagram, map size:" << msg->count();
+  // qDebug() << "Sending to" << *IP << port;
   QByteArray data;
   QDataStream *serializer = new QDataStream(&data, QIODevice::WriteOnly);
   *serializer << *msg;
   delete serializer;
 
-  qDebug() << "Writing data to wire, size (B):" << data.size();
+  // qDebug() << "Writing data to wire, size (B):" << data.size();
 
   NetSocket::sock->writeDatagram(data, *IP, port);
 }
@@ -81,6 +88,40 @@ void Communicator::sendVariantMap(QVariantMap *msg,
 void Communicator::sendVariantMap(QVariantMap *msg, Peer *p)
 {
   sendVariantMap(msg, &p->IPAddress, p->port);
+}
+
+void Communicator::sendBlock(quint64 h, QByteArray *block)
+{
+  QVariantMap msg;
+  msg.insert("BlockStore", QVariant(1));
+  msg.insert("Hash", QVariant(h));
+  msg.insert("Data", QVariant(*block));
+  Peer *p = Chord::chord->smallest;
+  if (h <= p->name || h > p->prev->name)
+  {
+    sendVariantMap(&msg, p);
+    qDebug() << "Sending block"
+             << quint64ToHex(h)
+             << "to"
+             << quint64ToHex(p->name);
+  }
+  else
+  {
+    p = p->next;
+    while (p != Chord::chord->smallest)
+    {
+      if (h <= p->name)
+      {
+        sendVariantMap(&msg, p);
+        qDebug() << "Sending block"
+                 << quint64ToHex(h)
+                 << "to"
+                 << quint64ToHex(p->name);
+        break;
+      }
+      p = p->next;
+    }
+  }
 }
 
 ///////////

@@ -2,9 +2,11 @@
 #include <QVBoxLayout>
 #include <QGroupBox>
 #include <QDebug>
+#include <QPushButton>
 
 #include "chorddialog.hh"
 #include "peer.hh"
+#include "fileshare.hh"
 
 ChordDialog *ChordDialog::dialog = NULL;
 
@@ -38,6 +40,10 @@ ChordDialog::ChordDialog()
 
   searchList = new QListWidget(this);
 
+  // File Sharing
+  QPushButton *fileShareButton = new QPushButton("Share File", this);
+  fileShareButton->setMaximumHeight(35);
+
 
   // Setting the layout
 
@@ -51,6 +57,7 @@ ChordDialog::ChordDialog()
 	layout->addWidget(textline, 1, 1);
   // Third Column
   layout->addWidget(groupBoxConnect, 0, 2);
+  layout->addWidget(fileShareButton, 1, 2);
 	setLayout(layout);
 
 	connect(textline, SIGNAL(returnPressed()),
@@ -59,24 +66,14 @@ ChordDialog::ChordDialog()
           this, SLOT(gotReturnPressedConnection()));
   connect(searchBox, SIGNAL(returnPressed()),
           this, SLOT(gotReturnPressedSearch()));
+  connect(fileShareButton, SIGNAL(clicked()),
+          FileShare::share, SLOT(fileShareButtonPressed()));
 }
 
-///////////
-// SLOTS //
-///////////
-
-void ChordDialog::gotReturnPressed()
-{
-	textview->append(textline->text());
-
-	textline->clear();
-}
-
-void ChordDialog::gotReturnPressedConnection()
+void ChordDialog::initChord(QString connection)
 {
   if (Chord::chord == NULL)
   {
-    QString connection = newConnection->toPlainText();
     if (connection != "New")
     {
       Peer *p = Peer::fromString(connection);
@@ -95,6 +92,23 @@ void ChordDialog::gotReturnPressedConnection()
       new Chord();
     }
   }
+}
+
+///////////
+// SLOTS //
+///////////
+
+void ChordDialog::gotReturnPressed()
+{
+	textview->append(textline->text());
+
+	textline->clear();
+}
+
+void ChordDialog::gotReturnPressedConnection()
+{
+  QString connection = newConnection->toPlainText();
+  initChord(connection);
   newConnection->clear();
 }
 

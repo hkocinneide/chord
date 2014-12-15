@@ -4,6 +4,7 @@
 #include <QHostInfo>
 
 #include "peer.hh"
+#include "main.hh"
 #include "netsocket.hh"
 
 quint64 Peer::myName = 0;
@@ -29,22 +30,8 @@ Peer::Peer(QHostAddress IP, quint16 port)
   QDataStream blockStream(&blockToHash, QIODevice::WriteOnly);
   blockStream << hashData;
 
-  name = Peer::Sha1Mod64(&blockToHash);
+  name = Sha1Mod64(&blockToHash);
   qDebug() << "Peer's name:" << QString::number(name, 16);
-}
-
-quint64 Peer::Sha1Mod64(QByteArray *data)
-{
-  // qDebug() << "Block to hash from IP and port:" << data->toHex();
-  QByteArray rawHash =
-    QCryptographicHash::hash(*data, QCryptographicHash::Sha1);
-  // qDebug() << "Hash of that block:" << rawHash.toHex();
-  QByteArray rawHashMod64 = rawHash.right(8);
-  // qDebug() << "Right eight bytes of that:" << rawHashMod64.toHex();
-  QDataStream hashStream(&rawHashMod64, QIODevice::ReadOnly);
-  quint64 r;
-  hashStream >> r;
-  return r;
 }
 
 // Make a local host peer
