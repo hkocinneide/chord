@@ -18,6 +18,7 @@ public:
   QMap<QString, quint64> *sharedFiles;
   QSet<quint64> *storedBlocks;
   void receiveBlock(QVariantMap *msg);
+  void addFile(QVariantMap *msg);
 
 public slots:
   void fileShareButtonPressed(void);

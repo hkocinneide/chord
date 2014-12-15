@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <QFileDialog>
 #include <QDebug>
 #include <QDataStream>
@@ -39,7 +40,25 @@ void FileShare::fileShareButtonPressed(void)
       qDebug() << "Successfully opened a file";
       QList<QByteArray*> *blocks = processFile(&file, &fileSize);
       QByteArray *blockList = constructBlockList(blocks);
+      quint64 blockListHash = Sha1Mod64(blockList);
+      qDebug() << "Sending block list";
+      Communicator::comm->sendBlock(blockListHash, blockList);
+      qDebug() << "Telling everyone else about our file";
+      Communicator::comm->shareFile(filename, blockListHash);
     }
+  }
+}
+
+void FileShare::addFile(QVariantMap *msg)
+{
+  if (msg->contains("ShareFile") && msg->contains("Filename") &&
+      msg->contains("BlockListHash"))
+  {
+    quint64 h = msg->value("BlockListHash").toULongLong();
+    QString file = msg->value("Filename").toString();
+    qDebug() << "Adding new file:" << file
+             << "to our list, with hash" << quint64ToHex(h);
+    sharedFiles->insert(file, h);
   }
 }
 
@@ -117,6 +136,7 @@ QByteArray *FileShare::constructBlockList(QList<QByteArray*> *blockList)
     quint64 h = Sha1Mod64(block);
     blockHash->append(h);
     Communicator::comm->sendBlock(h, block);
+    usleep(5000);
   }
   return blockHash;
 }

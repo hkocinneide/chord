@@ -21,6 +21,7 @@ public:
   void sendVariantMap(QVariantMap *msg, QHostAddress *IP, quint16 port); 
   void sendVariantMap(QVariantMap *msg, Peer *peer);
   void sendBlock(quint64, QByteArray *block);
+  void shareFile(QString fileName, quint64 hash);
 
 public slots:
   void gotReadyRead();

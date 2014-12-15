@@ -63,6 +63,10 @@ void Communicator::processDatagram(QByteArray *datagram,
   {
     FileShare::share->receiveBlock(&map);
   }
+  else if (map.contains("ShareFile"))
+  {
+    FileShare::share->addFile(&map);
+  }
   else
   {
     qDebug() << "Got an unknown message";
@@ -90,6 +94,20 @@ void Communicator::sendVariantMap(QVariantMap *msg, Peer *p)
   sendVariantMap(msg, &p->IPAddress, p->port);
 }
 
+void Communicator::shareFile(QString file, quint64 h)
+{
+  QVariantMap msg;
+  msg.insert("ShareFile", QVariant(1));
+  msg.insert("Filename", QVariant(file));
+  msg.insert("BlockListHash", QVariant(h));
+  Peer *p = Chord::chord->finger;
+  do
+  {
+    sendVariantMap(&msg, p);
+    p = p->next;
+  } while (p != Chord::chord->finger);
+}
+
 void Communicator::sendBlock(quint64 h, QByteArray *block)
 {
   QVariantMap msg;
@@ -99,7 +117,14 @@ void Communicator::sendBlock(quint64 h, QByteArray *block)
   Peer *p = Chord::chord->smallest;
   if (h <= p->name || h > p->prev->name)
   {
-    sendVariantMap(&msg, p);
+    if (p->name == Peer::myName)
+    {
+      FileShare::share->receiveBlock(&msg);
+    }
+    else
+    {
+      sendVariantMap(&msg, p);
+    }
     qDebug() << "Sending block"
              << quint64ToHex(h)
              << "to"
@@ -112,7 +137,14 @@ void Communicator::sendBlock(quint64 h, QByteArray *block)
     {
       if (h <= p->name)
       {
-        sendVariantMap(&msg, p);
+        if (p->name == Peer::myName)
+        {
+          FileShare::share->receiveBlock(&msg);
+        }
+        else
+        {
+          sendVariantMap(&msg, p);
+        }
         qDebug() << "Sending block"
                  << quint64ToHex(h)
                  << "to"
