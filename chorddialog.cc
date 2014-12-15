@@ -17,12 +17,8 @@ ChordDialog::ChordDialog()
 
 	setWindowTitle("Chord");
 
-	textview = new QTextEdit(this);
-	textview->setReadOnly(true);
-	textline = new QLineEdit(this);
-
   // Add yourself to the network
-  QGroupBox *groupBoxConnect = new QGroupBox(tr("Join a Network"));
+  QGroupBox *groupBoxConnect = new QGroupBox(tr("Command"));
 
   newConnection = new TextEntryBox();
   newConnection->setMaximumHeight(35);
@@ -54,16 +50,11 @@ ChordDialog::ChordDialog()
   // First Column - Search
   layout->addWidget(searchBoxOutline, 0, 0);
   layout->addWidget(searchList, 1, 0);
-  // Second Column - 
-	layout->addWidget(textview, 0, 1);
-	layout->addWidget(textline, 1, 1);
   // Third Column
   layout->addWidget(groupBoxConnect, 0, 2);
   layout->addWidget(fileShareButton, 1, 2);
 	setLayout(layout);
 
-	connect(textline, SIGNAL(returnPressed()),
-          this, SLOT(gotReturnPressed()));
   connect(newConnection, SIGNAL(returnPressed()),
           this, SLOT(gotReturnPressedConnection()));
   connect(searchBox, SIGNAL(returnPressed()),
@@ -102,16 +93,13 @@ void ChordDialog::initChord(QString connection)
 // SLOTS //
 ///////////
 
-void ChordDialog::gotReturnPressed()
-{
-	textview->append(textline->text());
-
-	textline->clear();
-}
-
 void ChordDialog::gotReturnPressedConnection()
 {
   QString connection = newConnection->toPlainText();
+  if (connection == "Quit")
+  {
+    Chord::chord->leaveChord();
+  }
   initChord(connection);
   newConnection->clear();
 }

@@ -1,6 +1,8 @@
 #include "chord.hh"
 #include "netsocket.hh"
 #include "communicator.hh"
+#include "main.hh"
+#include "fileshare.hh"
 
 Chord *Chord::chord = NULL;
 
@@ -62,11 +64,52 @@ void Chord::endSync()
 {
   sync = false;
   notifyOthers();
+  askForFiles(finger->next);
 }
 
 void Chord::notified(QVariantMap *msg)
 {
   syncPeer(msg);
+}
+
+void Chord::syncNodeFiles(quint64 name)
+{
+  qDebug() << "Syncing new node";
+  QMap<QString, quint64>::iterator i = FileShare::share->sharedFiles->begin();
+  for (; i != FileShare::share->sharedFiles->end(); i++)
+  {
+    qDebug() << "Sharing file" << i.key();
+    Communicator::comm->shareFile(i.key(), i.value());
+  }
+
+  qDebug() << "Now sending them the blocks";
+
+  QSet<quint64>::iterator j = FileShare::share->storedBlocks->begin();
+  QList<quint64> toRemove;
+  for (; j != FileShare::share->storedBlocks->end(); j++)
+  {
+    if ((*j) <= name)
+    {
+      QByteArray *fileData = FileShare::share->readBlockFromDisk(quint64ToHex(*j));
+      Communicator::comm->sendBlock(*j, fileData);
+      QString path = "client_downloads/" + quint64ToHex(Peer::myName) + "/" + quint64ToHex(*j);
+      qDebug() << "Removing" << path;
+      QFile::remove(path);
+      toRemove.append(*j);
+    }
+  }
+  QList<quint64>::iterator k = toRemove.begin();
+  for (; k != toRemove.end(); k++)
+  {
+    FileShare::share->storedBlocks->remove(*k);
+  }
+}
+
+void Chord::askForFiles(Peer *p)
+{
+  QVariantMap msg;
+  msg.insert("AskForFiles", QVariant(Peer::myName));
+  Communicator::comm->sendVariantMap(&msg, p);
 }
 
 void Chord::notifyOthers()
@@ -100,6 +143,57 @@ void Chord::syncPeer(QVariantMap *map)
   {
     qDebug() << "Couldn't read the sync message?";
   }
+}
+
+bool Chord::removeFromFinger(QString name)
+{
+  qDebug() << "Removing" << name << "from finger table";
+  Peer *p = finger;
+  do
+  {
+    if (quint64ToHex(p->name) == name)
+    {
+      // Only one in dht
+      if (p->next == p)
+      {
+        qDebug() << "Shutting down chord ring forever Q.Q";
+        return false;
+      }
+      if (p == smallest)
+      {
+        smallest = smallest->next;
+      }
+      p->prev->next = p->next;
+      p->next->prev = p->prev;
+      delete p;
+      return true;
+    }
+    p = p->next;
+  } while (p != finger);
+  qWarning() << "removeFromFinger: Should not have gotten here ERROR";
+  return false;
+}
+
+void Chord::leaveChord()
+{
+  qDebug() << "Leaving Chord";
+  if (removeFromFinger(quint64ToHex(Peer::myName)))
+  {
+    Peer *p = smallest;
+    do
+    {
+      Communicator::comm->notifyLeave(quint64ToHex(Peer::myName), p);
+      p = p->next;
+    } while (p != smallest);
+    QSet<quint64>::iterator i = FileShare::share->storedBlocks->begin(); 
+    for (; i != FileShare::share->storedBlocks->end(); i++)
+    {
+      QByteArray *fileData = FileShare::share->readBlockFromDisk(quint64ToHex(*i));
+      Communicator::comm->sendBlock(*i, fileData);
+      FileShare::share->deleteBlockFromDisk(quint64ToHex(*i));
+    }
+  }
+  exit(0);
 }
 
 void Chord::addPeerToFinger(Peer *p)

@@ -35,6 +35,8 @@ public:
   void receiveBlockReply(QVariantMap *msg);
   void requestNextBlock();
   void constructFile();
+  QByteArray *readBlockFromDisk(QString name);
+  void deleteBlockFromDisk(QString file);
 
 public slots:
   void fileShareButtonPressed(void);
@@ -43,7 +45,6 @@ private:
   QList<QByteArray*> *processFile(QFile *file, int *fileSize);
   QByteArray *constructBlockList(QList<QByteArray*> *blocks);
   void saveBlockToDisk(QString name, QByteArray *data);
-  QByteArray *readBlockFromDisk(QString name);
 };
 
 #endif // CHORD_FILESHARE_HH

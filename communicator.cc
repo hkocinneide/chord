@@ -78,6 +78,14 @@ void Communicator::processDatagram(QByteArray *datagram,
     else
       FileShare::share->receiveBlockReply(&map);
   }
+  else if (map.contains("NotifyLeave"))
+  {
+    Chord::chord->removeFromFinger(map.value("NotifyLeave").toString());
+  }
+  else if (map.contains("AskForFiles"))
+  {
+    Chord::chord->syncNodeFiles(map.value("AskForFiles").toULongLong());
+  }
   else
   {
     qDebug() << "Got an unknown message";
@@ -149,6 +157,13 @@ Peer *Communicator::findPeer(quint64 h)
     }
   }
   return NULL;
+}
+
+void Communicator::notifyLeave(QString name, Peer *p)
+{
+  QVariantMap msg;
+  msg.insert("NotifyLeave", QVariant(name));
+  sendVariantMap(&msg, p);
 }
 
 void Communicator::sendBlock(quint64 h, QByteArray *block)

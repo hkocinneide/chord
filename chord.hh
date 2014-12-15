@@ -23,6 +23,10 @@ public:
   void endSync();
   void syncPeer(QVariantMap *map);
   void notified(QVariantMap *msg);
+  void leaveChord();
+  bool removeFromFinger(QString name);
+  void syncNodeFiles(quint64 n);
+  void askForFiles(Peer *p);
 
 private:
   bool sync;

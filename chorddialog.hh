@@ -24,14 +24,11 @@ public:
   void initChord(QString connection);
 
 public slots:
-	void gotReturnPressed();
   void gotReturnPressedConnection();
   void gotReturnPressedSearch();
   void gotItemActivated(QListWidgetItem *item);
 
 private:
-	QTextEdit *textview;
-	QLineEdit *textline;
   TextEntryBox *newConnection;
   TextEntryBox *searchBox;
 };

@@ -57,10 +57,19 @@ void FileShare::addFile(QVariantMap *msg)
   {
     quint64 h = msg->value("BlockListHash").toULongLong();
     QString file = msg->value("Filename").toString();
-    qDebug() << "Adding new file:" << file
-             << "to our list, with hash" << quint64ToHex(h);
-    sharedFiles->insert(file, h);
+    if (!sharedFiles->contains(file))
+    {
+      qDebug() << "Adding new file:" << file
+               << "to our list, with hash" << quint64ToHex(h);
+      sharedFiles->insert(file, h);
+    }
   }
+}
+
+void FileShare::deleteBlockFromDisk(QString file)
+{
+  QString path = "client_downloads/" + quint64ToHex(Peer::myName) + "/" + file;
+  QFile::remove(path);
 }
 
 void FileShare::receiveBlock(QVariantMap *msg)
@@ -105,7 +114,7 @@ QByteArray *FileShare::readBlockFromDisk(QString name)
   }
   else
   {
-    qWarning() << "FILE DOESN'T EXIT WHAT DO WE DO";
+    qWarning() << "FILE DOESN'T EXIST WHAT DO WE DO";
   }
   return NULL;
 }

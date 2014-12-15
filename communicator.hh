@@ -24,6 +24,7 @@ public:
   void shareFile(QString fileName, quint64 hash);
   void requestBlock(quint64 h);
   Peer *findPeer(quint64 h);
+  void notifyLeave(QString name, Peer *p);
 
 public slots:
   void gotReadyRead();
