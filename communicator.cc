@@ -67,6 +67,17 @@ void Communicator::processDatagram(QByteArray *datagram,
   {
     FileShare::share->addFile(&map);
   }
+  else if (map.contains("BlockRequest"))
+  {
+    FileShare::share->receiveBlockRequest(&map, sender, senderPort);
+  }
+  else if (map.contains("BlockReply"))
+  {
+    if (FileShare::share->waitingOnBlockList)
+      FileShare::share->receiveBlockList(&map);
+    else
+      FileShare::share->receiveBlockReply(&map);
+  }
   else
   {
     qDebug() << "Got an unknown message";
@@ -108,27 +119,22 @@ void Communicator::shareFile(QString file, quint64 h)
   } while (p != Chord::chord->finger);
 }
 
-void Communicator::sendBlock(quint64 h, QByteArray *block)
+void Communicator::requestBlock(quint64 h)
 {
+  Peer *p = findPeer(h);
   QVariantMap msg;
-  msg.insert("BlockStore", QVariant(1));
+  msg.insert("BlockRequest", QVariant(1));
   msg.insert("Hash", QVariant(h));
-  msg.insert("Data", QVariant(*block));
+  FileShare::share->blockWaitingOn = h;
+  sendVariantMap(&msg, p);
+}
+
+Peer *Communicator::findPeer(quint64 h)
+{
   Peer *p = Chord::chord->smallest;
   if (h <= p->name || h > p->prev->name)
   {
-    if (p->name == Peer::myName)
-    {
-      FileShare::share->receiveBlock(&msg);
-    }
-    else
-    {
-      sendVariantMap(&msg, p);
-    }
-    qDebug() << "Sending block"
-             << quint64ToHex(h)
-             << "to"
-             << quint64ToHex(p->name);
+    return p;
   }
   else
   {
@@ -137,23 +143,33 @@ void Communicator::sendBlock(quint64 h, QByteArray *block)
     {
       if (h <= p->name)
       {
-        if (p->name == Peer::myName)
-        {
-          FileShare::share->receiveBlock(&msg);
-        }
-        else
-        {
-          sendVariantMap(&msg, p);
-        }
-        qDebug() << "Sending block"
-                 << quint64ToHex(h)
-                 << "to"
-                 << quint64ToHex(p->name);
-        break;
+        return p;
       }
       p = p->next;
     }
   }
+  return NULL;
+}
+
+void Communicator::sendBlock(quint64 h, QByteArray *block)
+{
+  QVariantMap msg;
+  msg.insert("BlockStore", QVariant(1));
+  msg.insert("Hash", QVariant(h));
+  msg.insert("Data", QVariant(*block));
+  Peer *p = findPeer(h);
+  if (p->name == Peer::myName)
+  {
+    FileShare::share->receiveBlock(&msg);
+  }
+  else
+  {
+    sendVariantMap(&msg, p);
+  }
+  qDebug() << "Sending block"
+           << quint64ToHex(h)
+           << "to"
+           << quint64ToHex(p->name);
 }
 
 ///////////

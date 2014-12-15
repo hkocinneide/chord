@@ -7,6 +7,7 @@
 #include "chorddialog.hh"
 #include "peer.hh"
 #include "fileshare.hh"
+#include "search.hh"
 
 ChordDialog *ChordDialog::dialog = NULL;
 
@@ -39,6 +40,7 @@ ChordDialog::ChordDialog()
   searchBoxOutline->setLayout(m);
 
   searchList = new QListWidget(this);
+  new Search(searchList);
 
   // File Sharing
   QPushButton *fileShareButton = new QPushButton("Share File", this);
@@ -66,6 +68,8 @@ ChordDialog::ChordDialog()
           this, SLOT(gotReturnPressedConnection()));
   connect(searchBox, SIGNAL(returnPressed()),
           this, SLOT(gotReturnPressedSearch()));
+  connect(searchList, SIGNAL(itemActivated(QListWidgetItem *)),
+          this, SLOT(gotItemActivated(QListWidgetItem *)));
   connect(fileShareButton, SIGNAL(clicked()),
           FileShare::share, SLOT(fileShareButtonPressed()));
 }
@@ -115,6 +119,12 @@ void ChordDialog::gotReturnPressedConnection()
 void ChordDialog::gotReturnPressedSearch()
 {
   QString query = searchBox->toPlainText();
-  // Do s.t.
+  searchList->clear();
+  Search::search->searchFiles(query);
   searchBox->clear();
+}
+
+void ChordDialog::gotItemActivated(QListWidgetItem *item)
+{
+  FileShare::share->itemActivated(item);
 }

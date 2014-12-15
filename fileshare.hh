@@ -5,6 +5,8 @@
 #include <QByteArray>
 #include <QFile>
 #include <QVariantMap>
+#include <QListWidget>
+#include <QHostAddress>
 
 class FileShare : public QObject
 {
@@ -17,8 +19,22 @@ public:
 
   QMap<QString, quint64> *sharedFiles;
   QSet<quint64> *storedBlocks;
+
+  QString fileBeingDownloadedName;
+  QByteArray *fileBeingDownloaded;
+  bool waitingOnBlockList;
+  int blockListPos;
+  QList<quint64> *blocksToRequest;
+  quint64 blockWaitingOn;
+
   void receiveBlock(QVariantMap *msg);
   void addFile(QVariantMap *msg);
+  void itemActivated(QListWidgetItem *item);
+  void receiveBlockRequest(QVariantMap *msg, QHostAddress *sender, quint16 port);
+  void receiveBlockList(QVariantMap *msg);
+  void receiveBlockReply(QVariantMap *msg);
+  void requestNextBlock();
+  void constructFile();
 
 public slots:
   void fileShareButtonPressed(void);

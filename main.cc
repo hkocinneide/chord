@@ -9,6 +9,7 @@
 #include "communicator.hh"
 #include "peer.hh"
 #include "fileshare.hh"
+#include "search.hh"
 
 #define TESTMAIN true
 
@@ -25,7 +26,6 @@ int main(int argc, char **argv)
 
 	ChordDialog dialog;
 	dialog.show();
-
 
   if (TESTMAIN)
   {
