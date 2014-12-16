@@ -1,6 +1,6 @@
-CPSC 426 Final Project 
-December 2014 
-Hugh O'Cinneide 
+CPSC 426 Final Project  
+December 2014  
+Hugh O'Cinneide  
 
 # Chordõs (Chord-ish)
 
