@@ -1,8 +1,8 @@
-CPSC 426 Final Project
-December 2014
-Hugh O'Cinneide
+CPSC 426 Final Project 
+December 2014 
+Hugh O'Cinneide 
 
-# Chord-ish
+# Chõrd-ish
 
 An implementation of some of the ideas presented in the Chord paper.
 
