@@ -2,7 +2,7 @@ CPSC 426 Final Project
 December 2014 
 Hugh O'Cinneide 
 
-# Chõrd-ish
+# Chordõs (Chord-ish)
 
 An implementation of some of the ideas presented in the Chord paper.
 
