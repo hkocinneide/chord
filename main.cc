@@ -11,7 +11,7 @@
 #include "fileshare.hh"
 #include "search.hh"
 
-#define TESTMAIN true
+#define TESTMAIN false
 
 int main(int argc, char **argv)
 {
