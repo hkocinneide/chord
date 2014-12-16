@@ -41,8 +41,36 @@ to deal with.
 Chord-ish was implemented almost from scratch, only using a little boilerplate
 code from peerster.
 
-### Motivation
+When a node uses the `New` command to make a new DHT, a new Peer object is
+created to describe itself. Peers are identified by the SHA-1 mod 64 hash of the
+48-bit identifier `IP << 16 + port`.  When a node joins a DHT, it indicates one
+node already inside the DHT to collect data from. It asks the current member of
+the DHT for all the current nodes in the DHT, along with all the files shared.
+The requested node sends it back a short description of all the nodes in the
+network along with information about all the files shared and their block list
+hashes. The joining node then requests blocks from the node that comes after it
+on the hash circle, and stores any blocks it receives. The network is
+represented by a circularly linked list of Peer objects inside each node.
 
-### Goals
+When a node shares a file, it breaks the file up into BLOCKSIZE (default 8000)
+byte blocks, takes their hash, and assigns them to the appropriate node on the
+network based on that hash. When a node receives a block, it saves it to disk in
+a file `./client_downloads/{Node Name}/{Block Name}`. The file's name and block
+list hash is then broadcast out to all the nodes in the DHT.
 
-### Improvements
+When a node wants to download a file, it finds the file in its local map of file
+names to block list hashes, requests the block list from the appropriate node,
+and then repeats the process for each of the block hashes.
+
+When a node leaves gracefully, it notifies all the nodes on the network to prune
+the node from their view of the network, and then gives all its files to the
+next node. 
+
+### Next steps
+
+There are a few next steps with this project:
+
+* Handling non-graceful exits with redundant storage and network correctness
+  checks
+* Recursively breaking up files into Merkle trees to make sure we aren't sending
+  files larger than BLOCKSIZE over the network
